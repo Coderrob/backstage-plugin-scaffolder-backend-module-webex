@@ -1,5 +1,11 @@
 # @coderrob/plugin-scaffolder-backend-module-webex
 
+## 1.0.4
+
+- Checked for outdated dependencies using npm outdated.
+- Updated package.json with the latest version numbers if necessary.
+- Addressed any security vulnerabilities by running npm audit fix.
+
 ## 1.0.3
 
 ### Patch Changes

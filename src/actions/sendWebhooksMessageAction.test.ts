@@ -43,7 +43,7 @@ describe('createSendWebhooksMessageAction', () => {
     mockedAxios.post.mockResolvedValue({ status: HttpStatusCode.Ok });
 
     // Execute
-    await action.handler(contextMultipleHooksMock);
+    await action.handler(contextMultipleHooksMock as any);
 
     // Verify
     expect(mockedAxios.post).toHaveBeenCalledTimes(2);
@@ -65,7 +65,7 @@ describe('createSendWebhooksMessageAction', () => {
     mockedAxios.post.mockResolvedValue({ status: HttpStatusCode.Ok });
 
     // Execute
-    await action.handler(contextMarkdownMessage);
+    await action.handler(contextMarkdownMessage as any);
 
     // Verify
     expect(mockedAxios.post).toHaveBeenCalledTimes(1);
@@ -84,7 +84,7 @@ describe('createSendWebhooksMessageAction', () => {
     });
 
     // Execute
-    await action.handler(contextMock);
+    await action.handler(contextMock as any);
 
     // Verify
     expect(contextMock.output).toHaveBeenCalledWith('failedMessages', [
@@ -98,7 +98,7 @@ describe('createSendWebhooksMessageAction', () => {
     mockedAxios.post.mockResolvedValueOnce({ status: HttpStatusCode.Ok });
 
     // Execute
-    await action.handler(contextMock);
+    await action.handler(contextMock as any);
 
     // Verify
     expect(contextMock.output).toHaveBeenCalledWith('failedMessages', [
@@ -111,7 +111,7 @@ describe('createSendWebhooksMessageAction', () => {
     /* no-setup */
 
     // Execute
-    await action.handler(contextMissingWebhooks);
+    await action.handler(contextMissingWebhooks as any);
 
     // Verify
     expect(mockedAxios.post).not.toHaveBeenCalled();
