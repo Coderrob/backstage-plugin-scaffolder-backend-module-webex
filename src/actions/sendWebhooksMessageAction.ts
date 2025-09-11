@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import { createTemplateAction } from '@backstage/plugin-scaffolder-node';
-import { MessageFormat, OutputField } from '../types';
+import { InputField, MessageFormat, OutputField } from '../types';
 import { isEmptyString, isError, isString, sendToWebhook } from '../utils';
 
 /**
@@ -41,9 +41,9 @@ export function createSendWebhooksMessageAction() {
     description: 'Sends a message using Webex Incoming Webhooks',
     schema: {
       input: {
-        format: z =>
+        [InputField.FORMAT]: z =>
           z.nativeEnum(MessageFormat).describe('The message content format'),
-        message: z =>
+        [InputField.MESSAGE]: z =>
           z
             .string({
               required_error: 'Message is required',
@@ -51,7 +51,7 @@ export function createSendWebhooksMessageAction() {
             })
             .min(1, 'Message cannot be empty')
             .describe('The message to send via webhook(s)'),
-        webhooks: z =>
+        [InputField.WEBHOOKS]: z =>
           z
             .string({
               required_error: 'Webhook URLs are required',
@@ -62,7 +62,7 @@ export function createSendWebhooksMessageAction() {
             .describe('The Webex Incoming Webhooks to send a message to'),
       },
       output: {
-        failedMessages: z =>
+        [OutputField.FAILED_MESSAGES]: z =>
           z.array(z.string()).describe('Failed webhook messages'),
       },
     },
@@ -72,7 +72,7 @@ export function createSendWebhooksMessageAction() {
 
       if (isDryRun) {
         logger.info(`Dry run is enabled, no messages will be sent`);
-        ctx.output('failedMessages', []);
+        ctx.output(OutputField.FAILED_MESSAGES, []);
         return;
       }
 

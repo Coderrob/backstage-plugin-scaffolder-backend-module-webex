@@ -12,6 +12,15 @@ export enum MessageFormat {
 }
 
 /**
+ * The input fields accepted by the `webex:webhooks:sendMessage` action.
+ */
+export enum InputField {
+  FORMAT = 'format',
+  MESSAGE = 'message',
+  WEBHOOKS = 'webhooks',
+}
+
+/**
  * The output fields produced by the `webex:webhooks:sendMessage` action.
  */
 export enum OutputField {

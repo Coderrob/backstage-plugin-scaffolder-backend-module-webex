@@ -70,13 +70,13 @@ describe('createSendWebhooksMessageAction', () => {
         expect(mockedAxios.post).toHaveBeenNthCalledWith(
           idx + 1,
           call[0],
-          call[1]
+          call[1],
         );
       });
 
       // Verify output is an empty failures array
       expect(ctx.output).toHaveBeenCalledWith(OutputField.FAILED_MESSAGES, []);
-    }
+    },
   );
 
   test('should handle non-200 responses from webhooks', async () => {
@@ -84,7 +84,7 @@ describe('createSendWebhooksMessageAction', () => {
     mockedAxios.post.mockImplementation(() =>
       Promise.resolve({
         status: HttpStatusCode.BadRequest,
-      })
+      }),
     );
 
     const ctx = makeContext({
@@ -106,9 +106,9 @@ describe('createSendWebhooksMessageAction', () => {
     expect(args[1]).toEqual(
       expect.arrayContaining([
         expect.stringMatching(
-          /Failed to send webhook message to .* \(HTTP \d+\)/
+          /Failed to send webhook message to .* \(HTTP \d+\)/,
         ),
-      ])
+      ]),
     );
   });
 
@@ -118,7 +118,7 @@ describe('createSendWebhooksMessageAction', () => {
     mockedAxios.post.mockImplementation(() =>
       Promise.resolve({
         status: HttpStatusCode.Ok,
-      })
+      }),
     );
 
     const ctx = makeContext({
@@ -138,9 +138,9 @@ describe('createSendWebhooksMessageAction', () => {
     expect(args[1]).toEqual(
       expect.arrayContaining([
         expect.stringMatching(
-          /Failed to send webhook message to .* \(HTTP \d+\)/
+          /Failed to send webhook message to .* \(HTTP \d+\)/,
         ),
-      ])
+      ]),
     );
   });
 
