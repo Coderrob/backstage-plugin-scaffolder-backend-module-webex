@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 @Coderrob
+ * Copyright 2025 @Coderrob
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,65 +13,92 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import axios, { HttpStatusCode } from 'axios';
 import { createTemplateAction } from '@backstage/plugin-scaffolder-node';
-import { format } from 'node:util';
-import { z } from 'zod';
-
-const ERROR_MESSAGE_FORMAT = 'Failed to send webhook message to %s (HTTP %d)';
+import { MessageFormat, OutputField } from '../types';
+import { isEmptyString, isError, isString, sendToWebhook } from '../utils';
 
 /**
  * Creates a `webex:webhooks:sendMessage` Scaffolder action.
  *
+ * The action accepts the following input:
+ * - `format`: one of 'text' or 'markdown'
+ * - `message`: the message body to send
+ * - `webhooks`: an optional array of Webex Incoming Webhook URLs
+ *
+ * The action writes one output property:
+ * - `failedMessages`: string[] - a list of human-readable failure messages
+ *   for the webhooks that failed. If all deliveries succeeded this will be an
+ *   empty array.
+ *
+ * The action supports dry-run mode; when dry-run is enabled it will not
+ * perform network requests and will return an empty `failedMessages` array.
+ *
  * @public
  */
 export function createSendWebhooksMessageAction() {
-  return createTemplateAction<{
-    format: string;
-    message: string;
-    webhooks: string[];
-  }>({
+  return createTemplateAction({
     id: 'webex:webhooks:sendMessage',
     description: 'Sends a message using Webex Incoming Webhooks',
     schema: {
-      input: z.object({
-        format: z
-          .enum(['text', 'markdown'])
-          .describe('The message content format'),
-        message: z
-          .string({
-            required_error: 'Message is required',
-            invalid_type_error: 'Message must be a string',
-          })
-          .min(1, 'Message should not be empty')
-          .describe('The message to send via webhook(s)'),
-        webhooks: z
-          .string({
-            required_error: 'Webhook urls are required',
-            invalid_type_error: 'Webhook urls must be a string array',
-          })
-          .array()
-          .nonempty()
-          .describe('The Webex Incoming Webhooks to send a message to'),
-      }),
+      input: {
+        format: z =>
+          z.nativeEnum(MessageFormat).describe('The message content format'),
+        message: z =>
+          z
+            .string({
+              required_error: 'Message is required',
+              invalid_type_error: 'Message must be a string',
+            })
+            .min(1, 'Message cannot be empty')
+            .describe('The message to send via webhook(s)'),
+        webhooks: z =>
+          z
+            .string({
+              required_error: 'Webhook URLs are required',
+              invalid_type_error: 'Webhook URLs must be an array of strings',
+            })
+            .array()
+            .optional()
+            .describe('The Webex Incoming Webhooks to send a message to'),
+      },
+      output: {
+        failedMessages: z =>
+          z.array(z.string()).describe('Failed webhook messages'),
+      },
     },
+    supportsDryRun: true,
     async handler(ctx) {
-      const failedMessages: string[] = [];
-      const webhooks: string[] = ctx.input.webhooks || [];
-      for (const webhook of webhooks) {
-        try {
-          const { status } = await axios.post(webhook, {
-            [ctx.input.format]: ctx.input.message,
-          });
-          if (status !== HttpStatusCode.Ok) {
-            failedMessages.push(format(ERROR_MESSAGE_FORMAT, webhook, status));
-          }
-        } catch (error) {
-          const status = axios.isAxiosError(error) ? error.status : 500;
-          failedMessages.push(format(ERROR_MESSAGE_FORMAT, webhook, status));
-        }
+      const { isDryRun, logger } = ctx;
+
+      if (isDryRun) {
+        logger.info(`Dry run is enabled, no messages will be sent`);
+        ctx.output('failedMessages', []);
+        return;
       }
-      ctx.output('failedMessages', failedMessages);
+
+      try {
+        const { format, message, webhooks = [] } = ctx.input;
+
+        const payload = { [format]: message };
+        const failedMessages = await Promise.all(
+          webhooks.map((webhook: string) => sendToWebhook(webhook, payload)),
+        );
+
+        ctx.output(
+          OutputField.FAILED_MESSAGES,
+          failedMessages.filter(
+            (msg): msg is string => isString(msg) && !isEmptyString(msg),
+          ),
+        );
+      } catch (error) {
+        logger.error(
+          `Unexpected error sending webhook messages: ${error}`,
+          isError(error) ? error : {},
+        );
+        ctx.output(OutputField.FAILED_MESSAGES, [
+          'Unexpected error sending webhook messages',
+        ]);
+      }
     },
   });
 }

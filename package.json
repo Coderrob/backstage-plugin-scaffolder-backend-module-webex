@@ -6,23 +6,23 @@
     "role": "backend-plugin-module"
   },
   "dependencies": {
-    "@backstage/backend-plugin-api": "^0.8.1",
-    "@backstage/errors": "^1.2.4",
-    "@backstage/plugin-scaffolder-node": "^0.4.9",
-    "axios": "^1.7.5",
-    "zod": "^3.23.8"
+    "@backstage/backend-plugin-api": "^1.4.2",
+    "@backstage/errors": "^1.2.7",
+    "@backstage/plugin-scaffolder-node": "^0.11.0",
+    "axios": "^1.9.0",
+    "zod": "^3.25.7"
   },
   "description": "A Webex scaffolding module for @backstage/plugin-scaffolder-backend",
   "devDependencies": {
-    "@backstage/cli": "^0.33.1",
-    "@backstage/plugin-scaffolder-node-test-utils": "^0.1.11",
-    "@backstage/types": "^1.2.1",
-    "@spotify/prettier-config": "^12.0.0",
-    "@types/jest": "29.5.12",
+    "@backstage/backend-common": "^0.25.0",
+    "@backstage/cli": "^0.34.1",
+    "@backstage/plugin-scaffolder-node-test-utils": "^0.3.2",
+    "@spotify/prettier-config": "^15.0.0",
+    "@types/jest": "^29.5.14",
     "jest": "^29.7.0",
-    "node-gyp": "^10.0.0",
-    "prettier": "^2.3.2",
-    "typescript": "~5.4.0"
+    "node-gyp": "^11.2.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
   },
   "engines": {
     "node": ">=18"
@@ -60,9 +60,8 @@
   },
   "main": "src/index.ts",
   "name": "@coderrob/backstage-plugin-scaffolder-backend-module-webex",
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e",
+  "packageManager": "yarn@4.9.1+sha512.f95ce356460e05be48d66401c1ae64ef84d163dd689964962c6888a9810865e39097a5e9de748876c2e0bf89b232d583c33982773e9903ae7a76257270986538",
   "prettier": "@spotify/prettier-config",
-  "private": false,
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org"
@@ -74,10 +73,11 @@
   "scripts": {
     "build": "backstage-cli package build",
     "clean": "backstage-cli package clean",
+    "format": "yarn prettier . --write",
     "lint": "backstage-cli package lint",
-    "lint:fix": "yarn prettier . --write",
     "postpack": "backstage-cli package postpack",
     "prepack": "backstage-cli package prepack",
+    "pretest": "tsc -p tsconfig.test.json",
     "prettier:check": "prettier --check .",
     "start": "backstage-cli package start",
     "test": "backstage-cli package test",
@@ -85,5 +85,5 @@
     "tsc:full": "tsc --skipLibCheck false --incremental false"
   },
   "types": "src/index.ts",
-  "version": "1.0.4"
+  "version": "1.1.0"
 }
