@@ -30,5 +30,8 @@ jobs:
       - name: Build types
         run: yarn tsc
 
+      - name: Lint code
+        run: yarn lint
+
       - name: Run tests
         run: yarn test
