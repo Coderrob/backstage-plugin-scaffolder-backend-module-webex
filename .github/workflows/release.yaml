@@ -25,6 +25,9 @@ jobs:
       - name: Test
         run: yarn test:coverage
 
+      - name: Lint code
+        run: yarn lint
+
       - name: Build
         run: yarn build
 

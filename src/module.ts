@@ -23,8 +23,20 @@ import { createSendWebhooksMessageAction } from './actions';
 import { readWebexActionOptions } from './webex/config';
 
 /**
+ * Webex Scaffolder backend module
+ *
+ * Registers custom scaffolder actions for sending messages to Webex Incoming
+ * Webhooks. This module is intended to be added to a Backstage backend init
+ * pipeline so the scaffolder backend will expose the `webex:webhooks:sendMessage`
+ * action to templates.
+ *
+ * Usage (in your backend module registration):
+ *
+ * ```ts
+ * backend.add(import('@coderrob/backstage-plugin-scaffolder-backend-module-webex'));
+ * ```
+ *
  * @public
- * The Webex Module for the Scaffolder Backend
  */
 export const webexScaffolderModule: BackendFeature = createBackendModule({
   moduleId: 'webex',
