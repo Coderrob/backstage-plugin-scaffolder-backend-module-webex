@@ -5,6 +5,7 @@
 ### Patch Changes
 
 - Upgraded Backstage dependencies and the supported Node.js versions.
+- Updated Backstage packages to their latest peer-compatible patch releases.
 - Added configurable Webex Incoming Webhook URLs and human-duration request timeouts.
 - Validated action and configured webhook destinations against the Webex Incoming Webhook contract without exposing secret URLs in errors.
 - Refactored webhook configuration, validation, and delivery into cohesive modules.

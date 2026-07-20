@@ -7,17 +7,17 @@
   },
   "configSchema": "config.d.ts",
   "dependencies": {
-    "@backstage/backend-plugin-api": "^1.9.2",
+    "@backstage/backend-plugin-api": "^1.9.3",
     "@backstage/config": "^1.3.8",
-    "@backstage/plugin-scaffolder-node": "^0.13.4",
+    "@backstage/plugin-scaffolder-node": "^0.13.5",
     "@backstage/types": "^1.2.2",
     "axios": "^1.18.1"
   },
   "description": "A Webex scaffolding module for @backstage/plugin-scaffolder-backend",
   "devDependencies": {
-    "@backstage/cli": "^0.36.3",
-    "@backstage/cli-defaults": "^0.1.3",
-    "@backstage/plugin-scaffolder-node-test-utils": "^0.3.12",
+    "@backstage/cli": "^0.36.4",
+    "@backstage/cli-defaults": "^0.1.4",
+    "@backstage/plugin-scaffolder-node-test-utils": "^0.3.13",
     "@jest/environment-jsdom-abstract": "^30.4.1",
     "@spotify/prettier-config": "^15.0.0",
     "@types/jest": "^30.0.0",
