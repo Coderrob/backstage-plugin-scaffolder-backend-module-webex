@@ -2,6 +2,7 @@
 /node_modules/
 /dist/
 /dist-types/
+/coverage/
 
 # Support local config
 app-config.local.yaml

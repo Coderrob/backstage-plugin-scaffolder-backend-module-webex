@@ -1,1 +1,4 @@
-export { createSendWebhooksMessageAction } from './sendWebhooksMessageAction';
+export {
+  createSendWebhooksMessageAction,
+  type SendWebhooksMessageActionOptions,
+} from './sendWebhooksMessageAction';

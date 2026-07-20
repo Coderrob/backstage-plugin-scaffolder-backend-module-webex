@@ -13,62 +13,140 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import axios, { HttpStatusCode } from 'axios';
-import { createTemplateAction } from '@backstage/plugin-scaffolder-node';
-import { format } from 'node:util';
-import { z } from 'zod';
+import {
+  createTemplateAction,
+  type TemplateAction,
+} from '@backstage/plugin-scaffolder-node';
+import {
+  durationToMilliseconds,
+  type HumanDuration,
+  type JsonObject,
+} from '@backstage/types';
+import { sendWebhookMessage } from '../webex/sendMessage';
+import {
+  resolveWebhookUrls,
+  validateActionWebhooks,
+  validateConfiguredWebhooks,
+} from '../webex/incomingWebhook';
 
-const ERROR_MESSAGE_FORMAT = 'Failed to send webhook message to %s (HTTP %d)';
+const DEFAULT_WEBHOOK_REQUEST_TIMEOUT: HumanDuration = { seconds: 10 };
+
+/** Options for the Webex send-message scaffolder action. */
+export interface SendWebhooksMessageActionOptions {
+  /** Maximum time to wait for each request. Defaults to 10 seconds. */
+  timeout?: HumanDuration;
+  /** Default webhook URLs used when an action input does not provide them. */
+  webhookUrls?: readonly string[];
+}
+
+/** Input accepted by the Webex send-message scaffolder action. */
+interface SendWebhooksMessageActionInput extends JsonObject {
+  format: 'text' | 'markdown';
+  message: string;
+  webhooks?: [string, ...string[]];
+}
+
+/** Output produced by the Webex send-message scaffolder action. */
+interface SendWebhooksMessageActionOutput extends JsonObject {
+  failedMessages: string[];
+}
 
 /**
  * Creates a `webex:webhooks:sendMessage` Scaffolder action.
  *
+ * @param options - Default webhook URLs and request timeout.
+ * @returns A Scaffolder template action that sends the supplied message to each
+ * configured Webex webhook and outputs all delivery failures.
+ *
+ * @remarks
+ * Creating the action has no side effects. Network requests occur only when its
+ * handler runs. Individual delivery failures are captured in `failedMessages`
+ * and do not stop delivery to subsequent webhooks.
+ *
  * @public
  */
-export function createSendWebhooksMessageAction() {
-  return createTemplateAction<{
-    format: string;
-    message: string;
-    webhooks: string[];
-  }>({
+export function createSendWebhooksMessageAction(
+  options: SendWebhooksMessageActionOptions = {},
+): TemplateAction<
+  SendWebhooksMessageActionInput,
+  SendWebhooksMessageActionOutput
+> {
+  const timeoutMs = durationToMilliseconds(
+    options.timeout ?? DEFAULT_WEBHOOK_REQUEST_TIMEOUT,
+  );
+  const configuredWebhooks = validateConfiguredWebhooks(options.webhookUrls);
+
+  return createTemplateAction({
     id: 'webex:webhooks:sendMessage',
     description: 'Sends a message using Webex Incoming Webhooks',
     schema: {
-      input: z.object({
-        format: z
-          .enum(['text', 'markdown'])
-          .describe('The message content format'),
-        message: z
-          .string({
-            required_error: 'Message is required',
-            invalid_type_error: 'Message must be a string',
-          })
-          .min(1, 'Message should not be empty')
-          .describe('The message to send via webhook(s)'),
-        webhooks: z
+      /**
+       * Builds the validated action input schema.
+       *
+       * @param z - Zod implementation supplied by Backstage.
+       * @returns The message format, content, and Webex webhook schema.
+       */
+      input: z => {
+        const webhooks = z
           .string({
             required_error: 'Webhook urls are required',
             invalid_type_error: 'Webhook urls must be a string array',
           })
+          .url('Webhook must be a valid URL')
           .array()
           .nonempty()
-          .describe('The Webex Incoming Webhooks to send a message to'),
-      }),
+          .describe('The Webex Incoming Webhooks to send a message to');
+
+        return z.object({
+          format: z
+            .enum(['text', 'markdown'])
+            .describe('The message content format'),
+          message: z
+            .string({
+              required_error: 'Message is required',
+              invalid_type_error: 'Message must be a string',
+            })
+            .min(1, 'Message should not be empty')
+            .describe('The message to send via webhook(s)'),
+          webhooks:
+            configuredWebhooks.length > 0 ? webhooks.optional() : webhooks,
+        });
+      },
+      /**
+       * Builds the action output schema.
+       *
+       * @param z - Zod implementation supplied by Backstage.
+       * @returns The collected delivery-failure schema.
+       */
+      output: z =>
+        z.object({
+          failedMessages: z
+            .array(z.string())
+            .describe(
+              'Webhook delivery failures, empty when all sends succeed',
+            ),
+        }),
     },
-    async handler(ctx) {
+    /**
+     * Sends the message to each webhook and reports delivery failures.
+     *
+     * @param ctx - Validated input and output writer from the scaffolder.
+     * @returns A promise that resolves after all webhooks are attempted.
+     */
+    async handler(ctx): Promise<void> {
       const failedMessages: string[] = [];
-      const webhooks: string[] = ctx.input.webhooks || [];
+      const webhooks = validateActionWebhooks(
+        resolveWebhookUrls(ctx.input.webhooks, configuredWebhooks),
+      );
       for (const webhook of webhooks) {
-        try {
-          const { status } = await axios.post(webhook, {
-            [ctx.input.format]: ctx.input.message,
-          });
-          if (status !== HttpStatusCode.Ok) {
-            failedMessages.push(format(ERROR_MESSAGE_FORMAT, webhook, status));
-          }
-        } catch (error) {
-          const status = axios.isAxiosError(error) ? error.status : 500;
-          failedMessages.push(format(ERROR_MESSAGE_FORMAT, webhook, status));
+        const failure = await sendWebhookMessage(
+          webhook,
+          ctx.input.format,
+          ctx.input.message,
+          timeoutMs,
+        );
+        if (failure) {
+          failedMessages.push(failure);
         }
       }
       ctx.output('failedMessages', failedMessages);
