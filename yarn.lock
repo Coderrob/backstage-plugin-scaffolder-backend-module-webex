@@ -1422,6 +1422,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     react-router-dom: "npm:^6.30.4"
     typescript: "npm:~5.9.3"
+    zod: "npm:^3.25.76"
   languageName: unknown
   linkType: soft
 

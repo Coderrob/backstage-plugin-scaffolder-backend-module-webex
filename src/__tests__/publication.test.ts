@@ -25,7 +25,7 @@ describe('npm package contents', () => {
       'dist/index.d.ts',
       'dist/module.cjs.js',
       'dist/actions/sendWebhooksMessageAction.cjs.js',
-      'dist/types/contracts.cjs.js',
+      'dist/contracts.cjs.js',
       'dist/config/readWebexActionOptions.cjs.js',
       'dist/webex/incomingWebhook.cjs.js',
       'dist/webex/sendWebhookMessage.cjs.js',

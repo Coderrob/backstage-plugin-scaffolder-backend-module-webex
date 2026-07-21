@@ -25,11 +25,11 @@ import {
   validateConfiguredWebhooks,
 } from '../webex/incomingWebhook';
 import {
+  MessageFormat,
   type SendWebhooksMessageActionInput,
   type SendWebhooksMessageActionOptions,
   type SendWebhooksMessageActionOutput,
-} from './contracts';
-import { MessageFormat } from '../types/contracts';
+} from '../contracts';
 
 const DEFAULT_WEBHOOK_REQUEST_TIMEOUT: HumanDuration = { seconds: 10 };
 

@@ -16,7 +16,7 @@
 
 import axios, { HttpStatusCode } from 'axios';
 import { format } from 'node:util';
-import { MessageFormat } from '../types/contracts';
+import { MessageFormat } from '../contracts';
 
 const ERROR_MESSAGE_FORMAT = 'Failed to send webhook message to %s (HTTP %d)';
 

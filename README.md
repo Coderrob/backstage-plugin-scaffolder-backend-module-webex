@@ -166,8 +166,10 @@ destinations from being attempted.
 
 ### Project structure
 
-- `src/actions/` contains the scaffolder action and its public contracts.
+- `src/contracts.ts` defines the package's shared public API contracts.
+- `src/actions/` contains the Scaffolder action implementation.
 - `src/config/` translates Backstage configuration into action options.
+- `src/utils/` contains generic internal runtime guards.
 - `src/webex/` validates Webex Incoming Webhook URLs and delivers messages.
 - `src/__tests__/` contains cross-cutting package contract tests.
 - `scripts/package/` contains npm prepack and publication validation tooling.

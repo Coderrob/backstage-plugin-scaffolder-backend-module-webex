@@ -1,5 +1,5 @@
 import axios, { HttpStatusCode } from 'axios';
-import { MessageFormat } from '../types/contracts';
+import { MessageFormat } from '../contracts';
 import { sendWebhookMessage } from './sendWebhookMessage';
 
 jest.mock('axios');
