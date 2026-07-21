@@ -1,10 +1,20 @@
 import axios, { HttpStatusCode } from 'axios';
-import { createMockActionContext } from '@backstage/plugin-scaffolder-node-test-utils';
+import type {
+  BackstageCredentials,
+  LoggerService,
+} from '@backstage/backend-plugin-api';
+import type { ActionContext } from '@backstage/plugin-scaffolder-node';
 import { createSendWebhooksMessageAction } from './sendWebhooksMessageAction';
 import { MessageFormat } from '../types/contracts';
-import type { SendWebhooksMessageActionInput } from './contracts';
+import type {
+  SendWebhooksMessageActionInput,
+  SendWebhooksMessageActionOutput,
+} from './contracts';
 
 jest.mock('axios');
+jest.mock('@backstage/plugin-scaffolder-node', () => ({
+  createTemplateAction: (options: unknown) => options,
+}));
 const mockedAxios = jest.mocked(axios);
 const action = createSendWebhooksMessageAction();
 const WEBHOOK_1 = 'https://webexapis.com/v1/webhooks/incoming/test-1';
@@ -16,12 +26,34 @@ const WEBHOOK_2 = 'https://webexapis.com/v1/webhooks/incoming/test-2';
  * @param input - Valid action input.
  * @returns A mock context with a Jest output writer.
  */
-function createContext(input: SendWebhooksMessageActionInput) {
-  return createMockActionContext<SendWebhooksMessageActionInput>({
-    input,
-    output: jest.fn(),
+function createContext(
+  input: SendWebhooksMessageActionInput,
+): ActionContext<
+  SendWebhooksMessageActionInput,
+  SendWebhooksMessageActionOutput
+> {
+  const logger: LoggerService = {
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+    debug: jest.fn(),
+    child: jest.fn(() => logger),
+  };
+  const credentials: BackstageCredentials = {
+    $$type: '@backstage/BackstageCredentials',
+    principal: { type: 'none' },
+  };
+
+  return {
+    logger,
     workspacePath: 'mock-workspace',
-  });
+    input,
+    checkpoint: async ({ fn }) => fn(),
+    output: jest.fn(),
+    createTemporaryDirectory: jest.fn(async () => 'mock-temp'),
+    getInitiatorCredentials: jest.fn(async () => credentials),
+    task: { id: 'mock-task-id' },
+  };
 }
 
 describe('createSendWebhooksMessageAction', () => {

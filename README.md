@@ -175,7 +175,8 @@ destinations from being attempted.
 
 Tests for a production module are colocated with that module.
 `yarn test` runs the suite once and exits; use `yarn test:watch` for an
-interactive local watch session.
+interactive local watch session. `yarn test:leaks` runs Jest serially with
+memory-leak and open-handle detection.
 
 Install dependencies and run the quality checks:
 
@@ -185,6 +186,7 @@ yarn audit
 yarn lint
 yarn tsc:full
 yarn test:coverage
+yarn test:leaks
 yarn build
 yarn publint
 ```
