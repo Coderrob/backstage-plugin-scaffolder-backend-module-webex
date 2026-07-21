@@ -16,6 +16,7 @@
 
 import axios, { HttpStatusCode } from 'axios';
 import { format } from 'node:util';
+import { MessageFormat } from '../types/contracts';
 
 const ERROR_MESSAGE_FORMAT = 'Failed to send webhook message to %s (HTTP %d)';
 
@@ -37,11 +38,13 @@ function failedMessage(webhook: string, status: number): string {
  * @returns The response status when available, otherwise HTTP 500.
  */
 function errorStatus(error: unknown): number {
-  return axios.isAxiosError(error) ? error.status ?? 500 : 500;
+  return axios.isAxiosError(error)
+    ? error.status ?? HttpStatusCode.InternalServerError
+    : HttpStatusCode.InternalServerError;
 }
 
 /**
- * Sends one message to a Webex incoming webhook.
+ * Delivers one message to a Webex incoming webhook.
  *
  * @param webhook - Webex incoming-webhook URL.
  * @param messageFormat - Payload field used for plain text or Markdown.
@@ -54,7 +57,7 @@ function errorStatus(error: unknown): number {
  */
 export async function sendWebhookMessage(
   webhook: string,
-  messageFormat: 'text' | 'markdown',
+  messageFormat: MessageFormat,
   message: string,
   timeoutMs: number,
 ): Promise<string | undefined> {

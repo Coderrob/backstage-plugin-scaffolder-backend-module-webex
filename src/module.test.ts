@@ -4,7 +4,7 @@ import {
 } from '@backstage/backend-plugin-api';
 import { scaffolderActionsExtensionPoint } from '@backstage/plugin-scaffolder-node';
 import { createSendWebhooksMessageAction } from './actions';
-import { readWebexActionOptions } from './webex/config';
+import { readWebexActionOptions } from './config/readWebexActionOptions';
 import { webexScaffolderModule } from './module';
 
 jest.mock('@backstage/backend-plugin-api', () => ({
@@ -17,7 +17,7 @@ jest.mock('@backstage/plugin-scaffolder-node', () => ({
 jest.mock('./actions', () => ({
   createSendWebhooksMessageAction: jest.fn(() => 'sendMessageAction'),
 }));
-jest.mock('./webex/config', () => ({
+jest.mock('./config/readWebexActionOptions', () => ({
   readWebexActionOptions: jest.fn(() => ({
     timeout: { seconds: 2, milliseconds: 500 },
     webhookUrls: ['configured-webhook'],

@@ -1,5 +1,5 @@
 import { ConfigReader } from '@backstage/config';
-import { readWebexActionOptions } from './config';
+import { readWebexActionOptions } from './readWebexActionOptions';
 
 describe('readWebexActionOptions', () => {
   test('should return undefined options when configuration is absent', () => {

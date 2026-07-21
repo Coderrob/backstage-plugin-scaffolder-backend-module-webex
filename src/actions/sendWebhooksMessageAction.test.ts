@@ -1,6 +1,8 @@
 import axios, { HttpStatusCode } from 'axios';
 import { createMockActionContext } from '@backstage/plugin-scaffolder-node-test-utils';
 import { createSendWebhooksMessageAction } from './sendWebhooksMessageAction';
+import { MessageFormat } from '../types/contracts';
+import type { SendWebhooksMessageActionInput } from './contracts';
 
 jest.mock('axios');
 const mockedAxios = jest.mocked(axios);
@@ -8,16 +10,14 @@ const action = createSendWebhooksMessageAction();
 const WEBHOOK_1 = 'https://webexapis.com/v1/webhooks/incoming/test-1';
 const WEBHOOK_2 = 'https://webexapis.com/v1/webhooks/incoming/test-2';
 
-type SendMessageInput = Parameters<typeof action.handler>[0]['input'];
-
 /**
  * Creates an isolated action context for handler tests.
  *
  * @param input - Valid action input.
  * @returns A mock context with a Jest output writer.
  */
-function createContext(input: SendMessageInput) {
-  return createMockActionContext<SendMessageInput>({
+function createContext(input: SendWebhooksMessageActionInput) {
+  return createMockActionContext<SendWebhooksMessageActionInput>({
     input,
     output: jest.fn(),
     workspacePath: 'mock-workspace',
@@ -25,11 +25,11 @@ function createContext(input: SendMessageInput) {
 }
 
 describe('createSendWebhooksMessageAction', () => {
-  beforeEach(jest.clearAllMocks);
+  beforeEach(jest.resetAllMocks);
 
   test('should send messages to all webhooks successfully', async () => {
     const context = createContext({
-      format: 'text',
+      format: MessageFormat.Text,
       message: 'Test message',
       webhooks: [WEBHOOK_1, WEBHOOK_2],
     });
@@ -41,13 +41,13 @@ describe('createSendWebhooksMessageAction', () => {
     expect(mockedAxios.post).toHaveBeenNthCalledWith(
       1,
       WEBHOOK_1,
-      { text: 'Test message' },
+      { [MessageFormat.Text]: 'Test message' },
       { timeout: 10_000 },
     );
     expect(mockedAxios.post).toHaveBeenNthCalledWith(
       2,
       WEBHOOK_2,
-      { text: 'Test message' },
+      { [MessageFormat.Text]: 'Test message' },
       { timeout: 10_000 },
     );
     expect(context.output).toHaveBeenCalledWith('failedMessages', []);
@@ -55,7 +55,7 @@ describe('createSendWebhooksMessageAction', () => {
 
   test('should send markdown message to all webhooks successfully', async () => {
     const context = createContext({
-      format: 'markdown',
+      format: MessageFormat.Markdown,
       message: '# Test message',
       webhooks: [WEBHOOK_1],
     });
@@ -67,7 +67,7 @@ describe('createSendWebhooksMessageAction', () => {
     expect(mockedAxios.post).toHaveBeenNthCalledWith(
       1,
       WEBHOOK_1,
-      { markdown: '# Test message' },
+      { [MessageFormat.Markdown]: '# Test message' },
       { timeout: 10_000 },
     );
     expect(context.output).toHaveBeenCalledWith('failedMessages', []);
@@ -78,7 +78,7 @@ describe('createSendWebhooksMessageAction', () => {
       timeout: { seconds: 2, milliseconds: 500 },
     });
     const context = createContext({
-      format: 'text',
+      format: MessageFormat.Text,
       message: 'Test message',
       webhooks: [WEBHOOK_1],
     });
@@ -88,7 +88,7 @@ describe('createSendWebhooksMessageAction', () => {
 
     expect(mockedAxios.post).toHaveBeenCalledWith(
       WEBHOOK_1,
-      { text: 'Test message' },
+      { [MessageFormat.Text]: 'Test message' },
       { timeout: 2_500 },
     );
   });
@@ -98,7 +98,7 @@ describe('createSendWebhooksMessageAction', () => {
       webhookUrls: [WEBHOOK_2],
     });
     const context = createContext({
-      format: 'text',
+      format: MessageFormat.Text,
       message: 'Configured destination',
     });
     mockedAxios.post.mockResolvedValue({ status: HttpStatusCode.Ok });
@@ -107,7 +107,7 @@ describe('createSendWebhooksMessageAction', () => {
 
     expect(mockedAxios.post).toHaveBeenCalledWith(
       WEBHOOK_2,
-      { text: 'Configured destination' },
+      { [MessageFormat.Text]: 'Configured destination' },
       { timeout: 10_000 },
     );
   });
@@ -117,7 +117,7 @@ describe('createSendWebhooksMessageAction', () => {
       webhookUrls: [WEBHOOK_2],
     });
     const context = createContext({
-      format: 'text',
+      format: MessageFormat.Text,
       message: 'Explicit destination',
       webhooks: [WEBHOOK_1],
     });
@@ -128,7 +128,7 @@ describe('createSendWebhooksMessageAction', () => {
     expect(mockedAxios.post).toHaveBeenCalledTimes(1);
     expect(mockedAxios.post).toHaveBeenCalledWith(
       WEBHOOK_1,
-      { text: 'Explicit destination' },
+      { [MessageFormat.Text]: 'Explicit destination' },
       { timeout: 10_000 },
     );
   });
@@ -143,7 +143,7 @@ describe('createSendWebhooksMessageAction', () => {
 
   test('should reject invalid action webhooks before sending', async () => {
     const context = createContext({
-      format: 'text',
+      format: MessageFormat.Text,
       message: 'Test message',
       webhooks: ['https://example.com/private-token'],
     });
@@ -156,7 +156,7 @@ describe('createSendWebhooksMessageAction', () => {
 
   test('should handle non-200 responses from webhooks', async () => {
     const context = createContext({
-      format: 'text',
+      format: MessageFormat.Text,
       message: 'Test message',
       webhooks: [WEBHOOK_1],
     });
@@ -173,7 +173,7 @@ describe('createSendWebhooksMessageAction', () => {
 
   test('should continue delivery and collect failures independently', async () => {
     const context = createContext({
-      format: 'text',
+      format: MessageFormat.Text,
       message: 'Test message',
       webhooks: [WEBHOOK_1, WEBHOOK_2],
     });
@@ -202,7 +202,7 @@ describe('createSendWebhooksMessageAction', () => {
     ],
   ])('should handle a rejected request', async (error, expectedStatus) => {
     const context = createContext({
-      format: 'text',
+      format: MessageFormat.Text,
       message: 'Test message',
       webhooks: [WEBHOOK_1],
     });

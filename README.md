@@ -1,6 +1,6 @@
 # Webex Scaffolder Backend Module for Backstage
 
-[![npm version](https://img.shields.io/npm/v/@coderrob/backstage-plugin-scaffolder-backend-module-webex.svg)](https://www.npmjs.com/package/@coderrob/backstage-plugin-scaffolder-backend-module-webex)
+[![npm package](https://img.shields.io/npm/v/@coderrob/backstage-plugin-scaffolder-backend-module-webex.svg?logo=npm&label=npm%20package)](https://www.npmjs.com/package/@coderrob/backstage-plugin-scaffolder-backend-module-webex)
 [![CI](https://github.com/Coderrob/backstage-plugin-scaffolder-backend-module-webex/actions/workflows/ci.yaml/badge.svg)](https://github.com/Coderrob/backstage-plugin-scaffolder-backend-module-webex/actions/workflows/ci.yaml)
 [![npm downloads](https://img.shields.io/npm/dm/@coderrob/backstage-plugin-scaffolder-backend-module-webex.svg)](https://www.npmjs.com/package/@coderrob/backstage-plugin-scaffolder-backend-module-webex)
 [![Node.js](https://img.shields.io/node/v/@coderrob/backstage-plugin-scaffolder-backend-module-webex.svg)](https://nodejs.org/)
@@ -23,6 +23,7 @@ Scaffolder action. The action sends text or Markdown messages to one or more
 
 - Backstage release line 1.52 or a compatible set of `@backstage` packages.
 - Node.js 22.22.2, 24.15.0, or a newer supported even-numbered release.
+- Corepack with the repository-pinned Yarn 4.8.1 package manager.
 - At least one Webex incoming-webhook URL.
 
 Treat webhook URLs as secrets. Do not commit real URLs to templates or source
@@ -163,18 +164,35 @@ destinations from being attempted.
 
 ## Development
 
+### Project structure
+
+- `src/actions/` contains the scaffolder action and its public contracts.
+- `src/config/` translates Backstage configuration into action options.
+- `src/webex/` validates Webex Incoming Webhook URLs and delivers messages.
+- `src/__tests__/` contains cross-cutting package contract tests.
+- `scripts/package/` contains npm prepack and publication validation tooling.
+- `scripts/local-setup.sh` creates a disposable Backstage app for integration testing.
+
+Tests for a production module are colocated with that module.
+`yarn test` runs the suite once and exits; use `yarn test:watch` for an
+interactive local watch session.
+
 Install dependencies and run the quality checks:
 
 ```bash
 yarn install
+yarn audit
 yarn lint
 yarn tsc:full
 yarn test:coverage
 yarn build
+yarn publint
 ```
 
-The test suite enforces at least 95% coverage for statements, branches,
-functions, and lines.
+The audit fails on high or critical dependency advisories. The test suite
+enforces at least 95% coverage for statements, branches, functions, and lines.
+Publint validates the Backstage-transformed npm artifact and its explicit
+publication allowlist.
 
 ## Contributing
 

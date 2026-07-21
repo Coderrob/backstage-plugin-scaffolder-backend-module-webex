@@ -28,6 +28,7 @@
     "jsdom": "^27.4.0",
     "lint-staged": "^17.1.0",
     "prettier": "^2.8.8",
+    "publint": "^0.3.21",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.30.4",
@@ -41,12 +42,15 @@
     "./package.json": "./package.json"
   },
   "files": [
-    "dist",
+    "dist/index.cjs.js",
+    "dist/index.d.ts",
+    "dist/module.cjs.js",
+    "dist/actions/sendWebhooksMessageAction.cjs.js",
+    "dist/types/contracts.cjs.js",
+    "dist/config/readWebexActionOptions.cjs.js",
+    "dist/webex/incomingWebhook.cjs.js",
+    "dist/webex/sendWebhookMessage.cjs.js",
     "config.d.ts",
-    "!**/*.json",
-    "!**/*.test.*",
-    "!**/*.tsbuildinfo",
-    "!yarn.lock",
     "catalog-info.yaml",
     "CHANGELOG.md",
     "README.md"
@@ -70,9 +74,8 @@
   },
   "main": "src/index.ts",
   "name": "@coderrob/backstage-plugin-scaffolder-backend-module-webex",
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e",
+  "packageManager": "yarn@4.8.1",
   "prettier": "@spotify/prettier-config",
-  "private": false,
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org"
@@ -80,6 +83,9 @@
   "repository": {
     "directory": ".",
     "type": "git"
+  },
+  "resolutions": {
+    "adm-zip": "0.6.0"
   },
   "jest": {
     "coverageThreshold": {
@@ -92,20 +98,24 @@
     }
   },
   "scripts": {
+    "audit": "yarn npm audit --recursive --severity high",
     "build": "backstage-cli package build",
     "clean": "backstage-cli package clean",
     "lint": "backstage-cli package lint",
     "lint:fix": "yarn prettier . --write",
     "postpack": "backstage-cli package postpack",
-    "prepack": "backstage-cli package prepack",
+    "prepack": "node scripts/package/prepack.mjs",
     "prepare": "husky",
     "prettier:check": "prettier --check .",
+    "publint": "node scripts/package/publint.mjs",
     "start": "backstage-cli package start",
-    "test": "backstage-cli package test",
+    "test": "backstage-cli package test --no-watch",
     "test:coverage": "backstage-cli package test --coverage --runInBand",
+    "test:watch": "backstage-cli package test --watch",
     "tsc": "tsc",
     "tsc:full": "tsc --skipLibCheck false --incremental false"
   },
+  "type": "commonjs",
   "types": "src/index.ts",
   "version": "1.1.0"
 }
