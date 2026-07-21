@@ -3,6 +3,7 @@
 /dist/
 /dist-types/
 /coverage/
+my-backstage-app
 
 # Support local config
 app-config.local.yaml

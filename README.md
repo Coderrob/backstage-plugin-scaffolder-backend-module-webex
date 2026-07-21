@@ -189,6 +189,36 @@ yarn build
 yarn publint
 ```
 
+### Local Backstage integration
+
+Run the setup script from a Unix-like shell with Git, a supported Node.js
+version, Corepack, and `npx` available:
+
+```bash
+bash scripts/local-setup.sh
+```
+
+Set `BACKSTAGE_APP_DIR` to override the default sibling application directory.
+The target must not already exist.
+
+The script builds and packages the current checkout, creates
+`../my-backstage-app`, installs the package in its backend, registers the
+backend module, adds an example Webex scaffolder template, and starts the
+Backstage development app. The process remains attached to the terminal; press
+Ctrl+C to stop it. Keeping the app beside the plugin repository prevents its
+workspace from affecting plugin linting and publication. The packaged plugin is kept under
+`../my-backstage-app/.local-packages`, so subsequent installs do not depend on a
+temporary file or an unpublished Git commit.
+
+Disable automatic startup for setup-only or automated checks with:
+
+```bash
+BACKSTAGE_START=false bash scripts/local-setup.sh
+```
+
+The script refuses to overwrite an existing `../my-backstage-app`. Move or
+remove an earlier disposable application before rerunning it.
+
 The audit fails on high or critical dependency advisories. The test suite
 enforces at least 95% coverage for statements, branches, functions, and lines.
 Publint validates the Backstage-transformed npm artifact and its explicit
