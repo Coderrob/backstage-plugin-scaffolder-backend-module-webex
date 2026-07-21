@@ -27,7 +27,7 @@ interface WebexActionOptions {
 }
 
 /**
- * Reads Webex action defaults from Backstage configuration.
+ * Translates Backstage configuration into Webex action defaults.
  *
  * @param config - Backstage root configuration service.
  * @returns Optional webhook destinations and a parsed human-duration timeout.

@@ -11,6 +11,12 @@
 - Refactored webhook configuration, validation, and delivery into cohesive modules.
 - Added pre-commit linting and formatting, clearer documentation, explicit type contracts, and comprehensive positive and negative tests.
 - Increased statements, branches, functions, and lines coverage to 100%.
+- Restricted the npm package to required runtime artifacts and excluded source maps and stale build output.
+- Added Publint validation for the Backstage-transformed npm artifact in CI and release workflows.
+- Added the public `MessageFormat` enum and use it across the action schema, input contract, and tests.
+- Reorganized configuration, Webex transport, and package tooling into cohesive responsibility-based folders.
+- Refreshed transitive dependencies and added a high-severity npm audit gate.
+- Migrated development and release tooling to Yarn 4.8.1 to match current Backstage development.
 
 ## 1.0.4
 

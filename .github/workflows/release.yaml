@@ -20,7 +20,10 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install --immutable
+
+      - name: Audit dependencies
+        run: yarn audit
 
       - name: Test
         run: yarn test:coverage
@@ -30,7 +33,10 @@ jobs:
       - name: Build
         run: yarn build
 
+      - name: Validate package
+        run: yarn publint
+
       - name: Publish to NPM
-        run: yarn publish --non-interactive
+        run: yarn npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

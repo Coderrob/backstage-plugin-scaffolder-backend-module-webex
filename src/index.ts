@@ -21,6 +21,9 @@
  */
 export {
   createSendWebhooksMessageAction,
+  type SendWebhooksMessageActionInput,
   type SendWebhooksMessageActionOptions,
+  type SendWebhooksMessageActionOutput,
 } from './actions';
+export { MessageFormat } from './types/contracts';
 export { webexScaffolderModule as default } from './module';

@@ -20,7 +20,7 @@ import {
 } from '@backstage/backend-plugin-api';
 import { scaffolderActionsExtensionPoint } from '@backstage/plugin-scaffolder-node';
 import { createSendWebhooksMessageAction } from './actions';
-import { readWebexActionOptions } from './webex/config';
+import { readWebexActionOptions } from './config/readWebexActionOptions';
 
 /**
  * Webex Scaffolder backend module

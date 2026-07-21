@@ -26,7 +26,10 @@ jobs:
           cache: yarn
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install --immutable
+
+      - name: Audit dependencies
+        run: yarn audit
 
       - name: Lint
         run: yarn lint
@@ -39,3 +42,6 @@ jobs:
 
       - name: Build
         run: yarn build
+
+      - name: Validate package
+        run: yarn publint

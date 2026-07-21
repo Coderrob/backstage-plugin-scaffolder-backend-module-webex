@@ -17,39 +17,21 @@ import {
   createTemplateAction,
   type TemplateAction,
 } from '@backstage/plugin-scaffolder-node';
-import {
-  durationToMilliseconds,
-  type HumanDuration,
-  type JsonObject,
-} from '@backstage/types';
-import { sendWebhookMessage } from '../webex/sendMessage';
+import { durationToMilliseconds, type HumanDuration } from '@backstage/types';
+import { sendWebhookMessage } from '../webex/sendWebhookMessage';
 import {
   resolveWebhookUrls,
   validateActionWebhooks,
   validateConfiguredWebhooks,
 } from '../webex/incomingWebhook';
+import {
+  type SendWebhooksMessageActionInput,
+  type SendWebhooksMessageActionOptions,
+  type SendWebhooksMessageActionOutput,
+} from './contracts';
+import { MessageFormat } from '../types/contracts';
 
 const DEFAULT_WEBHOOK_REQUEST_TIMEOUT: HumanDuration = { seconds: 10 };
-
-/** Options for the Webex send-message scaffolder action. */
-export interface SendWebhooksMessageActionOptions {
-  /** Maximum time to wait for each request. Defaults to 10 seconds. */
-  timeout?: HumanDuration;
-  /** Default webhook URLs used when an action input does not provide them. */
-  webhookUrls?: readonly string[];
-}
-
-/** Input accepted by the Webex send-message scaffolder action. */
-interface SendWebhooksMessageActionInput extends JsonObject {
-  format: 'text' | 'markdown';
-  message: string;
-  webhooks?: [string, ...string[]];
-}
-
-/** Output produced by the Webex send-message scaffolder action. */
-interface SendWebhooksMessageActionOutput extends JsonObject {
-  failedMessages: string[];
-}
 
 /**
  * Creates a `webex:webhooks:sendMessage` Scaffolder action.
@@ -99,7 +81,7 @@ export function createSendWebhooksMessageAction(
 
         return z.object({
           format: z
-            .enum(['text', 'markdown'])
+            .nativeEnum(MessageFormat)
             .describe('The message content format'),
           message: z
             .string({

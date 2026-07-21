@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Creates a disposable Backstage application for local integration testing.
 set -euo pipefail
 
 APP_NAME="my-backstage-app"
