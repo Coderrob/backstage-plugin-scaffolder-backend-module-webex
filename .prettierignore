@@ -5,6 +5,7 @@ coverage
 
 # Ignore dependencies
 node_modules
+my-backstage-app
 
 # Ignore VS Code
 .vscode

@@ -50,10 +50,10 @@
     "dist/config/readWebexActionOptions.cjs.js",
     "dist/webex/incomingWebhook.cjs.js",
     "dist/webex/sendWebhookMessage.cjs.js",
-    "config.d.ts",
-    "catalog-info.yaml",
-    "CHANGELOG.md",
-    "README.md"
+    "/config.d.ts",
+    "/catalog-info.yaml",
+    "/CHANGELOG.md",
+    "/README.md"
   ],
   "keywords": [
     "backstage",
