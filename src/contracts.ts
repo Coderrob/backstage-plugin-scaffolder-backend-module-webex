@@ -1,5 +1,16 @@
 import type { HumanDuration, JsonObject } from '@backstage/types';
-import { MessageFormat } from '../types/contracts';
+
+/**
+ * Public message formats supported by Webex Incoming Webhooks.
+ *
+ * @public
+ */
+export enum MessageFormat {
+  /** Plain-text Webex message. */
+  Text = 'text',
+  /** Webex-flavored Markdown message. */
+  Markdown = 'markdown',
+}
 
 /** Options for the Webex send-message scaffolder action. */
 export interface SendWebhooksMessageActionOptions {

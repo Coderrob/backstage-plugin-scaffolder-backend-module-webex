@@ -166,8 +166,10 @@ destinations from being attempted.
 
 ### Project structure
 
-- `src/actions/` contains the scaffolder action and its public contracts.
+- `src/contracts.ts` defines the package's shared public API contracts.
+- `src/actions/` contains the Scaffolder action implementation.
 - `src/config/` translates Backstage configuration into action options.
+- `src/utils/` contains generic internal runtime guards.
 - `src/webex/` validates Webex Incoming Webhook URLs and delivers messages.
 - `src/__tests__/` contains cross-cutting package contract tests.
 - `scripts/package/` contains npm prepack and publication validation tooling.
@@ -175,7 +177,8 @@ destinations from being attempted.
 
 Tests for a production module are colocated with that module.
 `yarn test` runs the suite once and exits; use `yarn test:watch` for an
-interactive local watch session.
+interactive local watch session. `yarn test:leaks` runs Jest serially with
+memory-leak and open-handle detection.
 
 Install dependencies and run the quality checks:
 
@@ -185,6 +188,7 @@ yarn audit
 yarn lint
 yarn tsc:full
 yarn test:coverage
+yarn test:leaks
 yarn build
 yarn publint
 ```

@@ -17,22 +17,17 @@
   "devDependencies": {
     "@backstage/cli": "^0.36.4",
     "@backstage/cli-defaults": "^0.1.4",
-    "@backstage/plugin-scaffolder-node-test-utils": "^0.3.13",
     "@jest/environment-jsdom-abstract": "^30.4.1",
     "@spotify/prettier-config": "^15.0.0",
     "@types/jest": "^30.0.0",
-    "@types/react": "^18.3.31",
     "husky": "^9.1.7",
     "jest": "^30.4.2",
-    "jest-environment-jsdom": "^30.4.1",
     "jsdom": "^27.4.0",
     "lint-staged": "^17.1.0",
     "prettier": "^2.8.8",
     "publint": "^0.3.21",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-router-dom": "^6.30.4",
-    "typescript": "~5.9.3"
+    "typescript": "~5.9.3",
+    "zod": "^3.25.76"
   },
   "engines": {
     "node": "^22.22.2 || ^24.15.0 || >=26"
@@ -46,7 +41,7 @@
     "dist/index.d.ts",
     "dist/module.cjs.js",
     "dist/actions/sendWebhooksMessageAction.cjs.js",
-    "dist/types/contracts.cjs.js",
+    "dist/contracts.cjs.js",
     "dist/config/readWebexActionOptions.cjs.js",
     "dist/webex/incomingWebhook.cjs.js",
     "dist/webex/sendWebhookMessage.cjs.js",
@@ -111,6 +106,7 @@
     "start": "backstage-cli package start",
     "test": "backstage-cli package test --no-watch",
     "test:coverage": "backstage-cli package test --coverage --runInBand",
+    "test:leaks": "backstage-cli package test --no-watch --runInBand --detectLeaks --detectOpenHandles",
     "test:watch": "backstage-cli package test --watch",
     "tsc": "tsc",
     "tsc:full": "tsc --skipLibCheck false --incremental false"
