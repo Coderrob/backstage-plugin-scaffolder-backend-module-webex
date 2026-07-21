@@ -3,7 +3,7 @@
     "outDir": "dist-types",
     "rootDir": "."
   },
-  "exclude": ["node_modules", "**/*.test.ts"],
+  "exclude": ["node_modules"],
   "extends": "@backstage/cli/config/tsconfig.json",
   "include": ["src"]
 }

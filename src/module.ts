@@ -13,9 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { createBackendModule } from '@backstage/backend-plugin-api';
-import { scaffolderActionsExtensionPoint } from '@backstage/plugin-scaffolder-node/alpha';
+import {
+  coreServices,
+  createBackendModule,
+  type BackendFeature,
+} from '@backstage/backend-plugin-api';
+import { scaffolderActionsExtensionPoint } from '@backstage/plugin-scaffolder-node';
 import { createSendWebhooksMessageAction } from './actions';
+import { readWebexActionOptions } from './webex/config';
 
 /**
  * Webex Scaffolder backend module
@@ -33,14 +38,31 @@ import { createSendWebhooksMessageAction } from './actions';
  *
  * @public
  */
-export const webexScaffolderModule = createBackendModule({
+export const webexScaffolderModule: BackendFeature = createBackendModule({
   moduleId: 'webex',
   pluginId: 'scaffolder',
-  register({ registerInit }) {
+  /**
+   * Registers the module's Backstage service dependencies.
+   *
+   * @param registration - Backend module registration API.
+   * @returns Nothing.
+   */
+  register({ registerInit }): void {
     registerInit({
-      deps: { scaffolder: scaffolderActionsExtensionPoint },
-      async init({ scaffolder }) {
-        scaffolder.addActions(createSendWebhooksMessageAction());
+      deps: {
+        config: coreServices.rootConfig,
+        scaffolder: scaffolderActionsExtensionPoint,
+      },
+      /**
+       * Creates and registers the configured Webex scaffolder action.
+       *
+       * @param dependencies - Root config and scaffolder extension point.
+       * @returns A promise that resolves after registration.
+       */
+      async init({ config, scaffolder }): Promise<void> {
+        scaffolder.addActions(
+          createSendWebhooksMessageAction(readWebexActionOptions(config)),
+        );
       },
     });
   },

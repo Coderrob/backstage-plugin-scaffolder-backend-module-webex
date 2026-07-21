@@ -1,161 +1,220 @@
 import axios, { HttpStatusCode } from 'axios';
 import { createMockActionContext } from '@backstage/plugin-scaffolder-node-test-utils';
 import { createSendWebhooksMessageAction } from './sendWebhooksMessageAction';
-import { MessageFormat, OutputField } from '../types';
 
 jest.mock('axios');
+const mockedAxios = jest.mocked(axios);
+const action = createSendWebhooksMessageAction();
+const WEBHOOK_1 = 'https://webexapis.com/v1/webhooks/incoming/test-1';
+const WEBHOOK_2 = 'https://webexapis.com/v1/webhooks/incoming/test-2';
+
+type SendMessageInput = Parameters<typeof action.handler>[0]['input'];
+
+/**
+ * Creates an isolated action context for handler tests.
+ *
+ * @param input - Valid action input.
+ * @returns A mock context with a Jest output writer.
+ */
+function createContext(input: SendMessageInput) {
+  return createMockActionContext<SendMessageInput>({
+    input,
+    output: jest.fn(),
+    workspacePath: 'mock-workspace',
+  });
+}
 
 describe('createSendWebhooksMessageAction', () => {
-  const mockedAxios = axios as jest.Mocked<typeof axios>;
-  const action = createSendWebhooksMessageAction();
-  function makeContext(input: any) {
-    return createMockActionContext({
-      input,
-      isDryRun: false,
-      output: jest.fn(),
+  beforeEach(jest.clearAllMocks);
+
+  test('should send messages to all webhooks successfully', async () => {
+    const context = createContext({
+      format: 'text',
+      message: 'Test message',
+      webhooks: [WEBHOOK_1, WEBHOOK_2],
     });
-  }
+    mockedAxios.post.mockResolvedValue({ status: HttpStatusCode.Ok });
 
-  const successCases = [
-    {
-      name: 'text - single webhook',
-      input: {
-        format: MessageFormat.TEXT,
-        message: 'Test message',
-        webhooks: ['https://webhook.url/1'],
-      },
-      expectedCalls: [['https://webhook.url/1', { text: 'Test message' }]],
-    },
-    {
-      name: 'text - multiple webhooks',
-      input: {
-        format: MessageFormat.TEXT,
-        message: 'Test message',
-        webhooks: ['https://webhook.url/1', 'https://webhook.url/2'],
-      },
-      expectedCalls: [
-        ['https://webhook.url/1', { text: 'Test message' }],
-        ['https://webhook.url/2', { text: 'Test message' }],
-      ],
-    },
-    {
-      name: 'markdown - single webhook',
-      input: {
-        format: MessageFormat.MARKDOWN,
-        message: '# Test message',
-        webhooks: ['https://webhook.url/1'],
-      },
-      expectedCalls: [
-        ['https://webhook.url/1', { markdown: '# Test message' }],
-      ],
-    },
-  ];
+    await action.handler(context);
 
-  afterEach(() => jest.clearAllMocks());
+    expect(mockedAxios.post).toHaveBeenCalledTimes(2);
+    expect(mockedAxios.post).toHaveBeenNthCalledWith(
+      1,
+      WEBHOOK_1,
+      { text: 'Test message' },
+      { timeout: 10_000 },
+    );
+    expect(mockedAxios.post).toHaveBeenNthCalledWith(
+      2,
+      WEBHOOK_2,
+      { text: 'Test message' },
+      { timeout: 10_000 },
+    );
+    expect(context.output).toHaveBeenCalledWith('failedMessages', []);
+  });
 
-  test.each(successCases)(
-    'should send messages: $name',
-    async ({ input, expectedCalls }) => {
-      // Setup
-      mockedAxios.post.mockResolvedValue({ status: HttpStatusCode.Ok });
+  test('should send markdown message to all webhooks successfully', async () => {
+    const context = createContext({
+      format: 'markdown',
+      message: '# Test message',
+      webhooks: [WEBHOOK_1],
+    });
+    mockedAxios.post.mockResolvedValue({ status: HttpStatusCode.Ok });
 
-      const ctx = makeContext(input);
+    await action.handler(context);
 
-      // Execute
-      await action.handler(ctx);
+    expect(mockedAxios.post).toHaveBeenCalledTimes(1);
+    expect(mockedAxios.post).toHaveBeenNthCalledWith(
+      1,
+      WEBHOOK_1,
+      { markdown: '# Test message' },
+      { timeout: 10_000 },
+    );
+    expect(context.output).toHaveBeenCalledWith('failedMessages', []);
+  });
 
-      // Verify axios calls
-      expect(mockedAxios.post).toHaveBeenCalledTimes(expectedCalls.length);
-      expectedCalls.forEach((call: any[], idx: number) => {
-        expect(mockedAxios.post).toHaveBeenNthCalledWith(
-          idx + 1,
-          call[0],
-          call[1],
-        );
-      });
+  test('should use the configured webhook timeout', async () => {
+    const configuredAction = createSendWebhooksMessageAction({
+      timeout: { seconds: 2, milliseconds: 500 },
+    });
+    const context = createContext({
+      format: 'text',
+      message: 'Test message',
+      webhooks: [WEBHOOK_1],
+    });
+    mockedAxios.post.mockResolvedValue({ status: HttpStatusCode.Ok });
 
-      // Verify output is an empty failures array
-      expect(ctx.output).toHaveBeenCalledWith(OutputField.FAILED_MESSAGES, []);
-    },
-  );
+    await configuredAction.handler(context);
+
+    expect(mockedAxios.post).toHaveBeenCalledWith(
+      WEBHOOK_1,
+      { text: 'Test message' },
+      { timeout: 2_500 },
+    );
+  });
+
+  test('should use configured webhooks when input omits them', async () => {
+    const configuredAction = createSendWebhooksMessageAction({
+      webhookUrls: [WEBHOOK_2],
+    });
+    const context = createContext({
+      format: 'text',
+      message: 'Configured destination',
+    });
+    mockedAxios.post.mockResolvedValue({ status: HttpStatusCode.Ok });
+
+    await configuredAction.handler(context);
+
+    expect(mockedAxios.post).toHaveBeenCalledWith(
+      WEBHOOK_2,
+      { text: 'Configured destination' },
+      { timeout: 10_000 },
+    );
+  });
+
+  test('should prefer action webhooks over configured defaults', async () => {
+    const configuredAction = createSendWebhooksMessageAction({
+      webhookUrls: [WEBHOOK_2],
+    });
+    const context = createContext({
+      format: 'text',
+      message: 'Explicit destination',
+      webhooks: [WEBHOOK_1],
+    });
+    mockedAxios.post.mockResolvedValue({ status: HttpStatusCode.Ok });
+
+    await configuredAction.handler(context);
+
+    expect(mockedAxios.post).toHaveBeenCalledTimes(1);
+    expect(mockedAxios.post).toHaveBeenCalledWith(
+      WEBHOOK_1,
+      { text: 'Explicit destination' },
+      { timeout: 10_000 },
+    );
+  });
+
+  test('should reject invalid configured webhooks without exposing them', () => {
+    expect(() =>
+      createSendWebhooksMessageAction({
+        webhookUrls: ['https://example.com/private-token'],
+      }),
+    ).toThrow('Invalid URL in webex.webhooks.urls configuration');
+  });
+
+  test('should reject invalid action webhooks before sending', async () => {
+    const context = createContext({
+      format: 'text',
+      message: 'Test message',
+      webhooks: ['https://example.com/private-token'],
+    });
+
+    await expect(action.handler(context)).rejects.toThrow(
+      'Invalid Webex Incoming Webhook URL in action input',
+    );
+    expect(mockedAxios.post).not.toHaveBeenCalled();
+  });
 
   test('should handle non-200 responses from webhooks', async () => {
-    // Setup
-    mockedAxios.post.mockImplementation(() =>
-      Promise.resolve({
-        status: HttpStatusCode.BadRequest,
-      }),
-    );
-
-    const ctx = makeContext({
-      format: MessageFormat.TEXT,
+    const context = createContext({
+      format: 'text',
       message: 'Test message',
-      webhooks: ['https://webhook.url/1'],
+      webhooks: [WEBHOOK_1],
+    });
+    mockedAxios.post.mockResolvedValueOnce({
+      status: HttpStatusCode.BadRequest,
     });
 
-    // Execute
-    await action.handler(ctx);
+    await action.handler(context);
 
-    // Debug: ensure axios.post was invoked
-    expect(mockedAxios.post).toHaveBeenCalledTimes(1);
-
-    // Verify output contains at least one failure message
-    expect(ctx.output).toHaveBeenCalled();
-    const args = (ctx.output as jest.Mock).mock.calls[0];
-    expect(args[0]).toBe(OutputField.FAILED_MESSAGES);
-    expect(args[1]).toEqual(
-      expect.arrayContaining([
-        expect.stringMatching(
-          /Failed to send webhook message to .* \(HTTP \d+\)/,
-        ),
-      ]),
-    );
+    expect(context.output).toHaveBeenCalledWith('failedMessages', [
+      `Failed to send webhook message to ${WEBHOOK_1} (HTTP 400)`,
+    ]);
   });
 
-  test('should handle exceptions thrown during the request', async () => {
-    // Setup
-    mockedAxios.post.mockRejectedValueOnce(new Error('Network error'));
-    mockedAxios.post.mockImplementation(() =>
-      Promise.resolve({
-        status: HttpStatusCode.Ok,
-      }),
-    );
-
-    const ctx = makeContext({
-      format: MessageFormat.TEXT,
+  test('should continue delivery and collect failures independently', async () => {
+    const context = createContext({
+      format: 'text',
       message: 'Test message',
-      webhooks: ['https://webhook.url/1'],
+      webhooks: [WEBHOOK_1, WEBHOOK_2],
     });
+    mockedAxios.post
+      .mockRejectedValueOnce(new Error('Network error'))
+      .mockResolvedValueOnce({ status: HttpStatusCode.Ok });
+    mockedAxios.isAxiosError.mockReturnValueOnce(false);
 
-    // Execute
-    await action.handler(ctx);
+    await action.handler(context);
 
-    // Verify axios was invoked and output contains at least one failure message
-    expect(mockedAxios.post).toHaveBeenCalledTimes(1);
-    expect(ctx.output).toHaveBeenCalledTimes(1);
-    const args = (ctx.output as jest.Mock).mock.calls[0];
-    expect(args[0]).toBe(OutputField.FAILED_MESSAGES);
-    expect(args[1]).toEqual(
-      expect.arrayContaining([
-        expect.stringMatching(
-          /Failed to send webhook message to .* \(HTTP \d+\)/,
-        ),
-      ]),
-    );
+    expect(mockedAxios.post).toHaveBeenCalledTimes(2);
+    expect(context.output).toHaveBeenCalledWith('failedMessages', [
+      `Failed to send webhook message to ${WEBHOOK_1} (HTTP 500)`,
+    ]);
   });
 
-  test('should handle empty webhooks array', async () => {
-    const ctx = makeContext({
-      format: MessageFormat.TEXT,
+  test.each([
+    [new Error('Network error'), 500],
+    [Object.assign(new Error('No response'), { isAxiosError: true }), 500],
+    [
+      Object.assign(new Error('Rate limited'), {
+        isAxiosError: true,
+        status: 429,
+      }),
+      429,
+    ],
+  ])('should handle a rejected request', async (error, expectedStatus) => {
+    const context = createContext({
+      format: 'text',
       message: 'Test message',
-      webhooks: [] as const,
+      webhooks: [WEBHOOK_1],
     });
+    mockedAxios.post.mockRejectedValueOnce(error);
+    mockedAxios.isAxiosError.mockReturnValueOnce(
+      'isAxiosError' in error && error.isAxiosError === true,
+    );
 
-    // Execute
-    await action.handler(ctx);
+    await action.handler(context);
 
-    // Verify
-    expect(mockedAxios.post).not.toHaveBeenCalled();
-    expect(ctx.output).toHaveBeenCalledWith(OutputField.FAILED_MESSAGES, []);
+    expect(context.output).toHaveBeenCalledWith('failedMessages', [
+      `Failed to send webhook message to ${WEBHOOK_1} (HTTP ${expectedStatus})`,
+    ]);
   });
 });

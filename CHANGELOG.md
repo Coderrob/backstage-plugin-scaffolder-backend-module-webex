@@ -4,12 +4,13 @@
 
 ### Patch Changes
 
-- Migrated: Bumped Backstage version to 1.42.x and removed dependency on deprecated `createTemplateAction` usage.
-- Refactor: Converted `sendWebhooksMessageAction` unit tests to a table-driven style and introduced a `makeContext` helper to remove duplicated test setup and unused cruft.
-- Fix: Tightened `failedMessages` filtering in `createSendWebhooksMessageAction` so successful deliveries are excluded and consumers receive an empty array when all sends succeed.
-- Test updates: Adjusted assertions to expect the `failedMessages` output to be an empty array on success. Tests were updated to construct fresh contexts per test to avoid shared state.
-- Misc: Small typing concession in tests (`makeContext(input: any)`) to keep the test utility usage straightforward.
-- Validation: All tests pass locally after these changes.
+- Upgraded Backstage dependencies and the supported Node.js versions.
+- Updated Backstage packages to their latest peer-compatible patch releases.
+- Added configurable Webex Incoming Webhook URLs and human-duration request timeouts.
+- Validated action and configured webhook destinations against the Webex Incoming Webhook contract without exposing secret URLs in errors.
+- Refactored webhook configuration, validation, and delivery into cohesive modules.
+- Added pre-commit linting and formatting, clearer documentation, explicit type contracts, and comprehensive positive and negative tests.
+- Increased statements, branches, functions, and lines coverage to 100%.
 
 ## 1.0.4
 
