@@ -104,9 +104,12 @@ cleanup() {
 package_plugin() {
   step "Packaging the current plugin checkout"
   TEMP_PLUGIN_ARCHIVE="$(mktemp "${TMPDIR:-/tmp}/webex-plugin.XXXXXX")"
-  yarn --cwd "$SOURCE_DIR" tsc
-  yarn --cwd "$SOURCE_DIR" build
-  yarn --cwd "$SOURCE_DIR" pack --out "$TEMP_PLUGIN_ARCHIVE"
+  (
+    cd -- "$SOURCE_DIR"
+    yarn tsc
+    yarn build
+    yarn pack --out "$TEMP_PLUGIN_ARCHIVE"
+  )
 }
 
 # Purpose: Generate the local Backstage application and enter its directory.
