@@ -11,6 +11,12 @@ updates:
     patterns:
       - '*'
     multi-ecosystem-group: dependencies
+    # Security updates are grouped separately and are not subject to cooldown.
+    groups:
+      npm-security:
+        applies-to: security-updates
+        patterns:
+          - '*'
     cooldown:
       default-days: 12
       include:
@@ -21,6 +27,11 @@ updates:
     patterns:
       - '*'
     multi-ecosystem-group: dependencies
+    groups:
+      actions-security:
+        applies-to: security-updates
+        patterns:
+          - '*'
     cooldown:
       default-days: 12
       include:
