@@ -1,5 +1,11 @@
 # @coderrob/plugin-scaffolder-backend-module-webex
 
+## [Unreleased]
+
+### Patch Changes
+
+- Added manual release preparation and tag-based or manually dispatched npm trusted publishing workflows.
+
 ## 1.1.0
 
 ### Patch Changes

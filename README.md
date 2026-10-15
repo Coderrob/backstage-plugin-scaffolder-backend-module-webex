@@ -228,6 +228,46 @@ enforces at least 95% coverage for statements, branches, functions, and lines.
 Publint validates the Backstage-transformed npm artifact and its explicit
 publication allowlist.
 
+## Releasing
+
+Releases use `.github/workflows/prepare-release.yml` and
+`.github/workflows/publish-npm.yml`.
+
+Before the first release, enable **Allow GitHub Actions to create and approve
+pull requests** under the repository's **Settings > Actions > General > Workflow
+permissions** so the preparation workflow can open a PR. In the npm package's
+**Settings > Trusted publishing**, configure GitHub Actions with:
+
+- Organization or user: `Coderrob`
+- Repository: `backstage-plugin-scaffolder-backend-module-webex`
+- Workflow filename: `publish-npm.yml`
+- Allow direct publishing with `npm publish`; leave the environment name empty.
+
+See [npm's trusted publishing setup](https://docs.npmjs.com/trusted-publishers/).
+Publishing uses GitHub OIDC and provenance, without an `NPM_TOKEN` secret.
+
+1. Add release notes under `## [Unreleased]` in `CHANGELOG.md` and merge them to
+   `main`.
+2. Run **Actions > Prepare Release > Run workflow** on `main`, choosing
+   `revision` (patch), `minor`, or `major`. The workflow increments the version,
+   moves the notes into a dated release section, runs the quality checks, and
+   opens a `release/vX.Y.Z` PR. Review and merge that PR. If GitHub marks its CI
+   runs as requiring approval, select **Approve workflows to run** on the PR.
+3. Create and push `vX.Y.Z` at the merged release commit on `main`. The tag push
+   runs **Publish To npm**. To manually publish an existing release tag instead,
+   dispatch that workflow using the tag as its ref:
+
+   ```bash
+   gh workflow run publish-npm.yml --ref vX.Y.Z
+   ```
+
+The publisher checks that the tag matches `package.json`, has dated release
+notes, and points to a commit in `main`. It reruns the audit, lint, type checks,
+coverage tests, build, and package validation, then packs through the Backstage
+prepack/postpack lifecycle before publishing the tarball with npm. A failed
+check stops publication. Dispatching the publisher on a branch fails; use a
+release tag. An already published npm version cannot be republished.
+
 ## Contributing
 
 Issues and pull requests are welcome. Please include tests for behavioral

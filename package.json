@@ -77,7 +77,8 @@
   },
   "repository": {
     "directory": ".",
-    "type": "git"
+    "type": "git",
+    "url": "git+https://github.com/Coderrob/backstage-plugin-scaffolder-backend-module-webex.git"
   },
   "resolutions": {
     "adm-zip": "0.6.0"
@@ -103,6 +104,7 @@
     "prepare": "husky",
     "prettier:check": "prettier --check .",
     "publint": "node scripts/package/publint.mjs",
+    "release:check": "node --test scripts/release/release.test.mjs",
     "start": "backstage-cli package start",
     "test": "backstage-cli package test --no-watch",
     "test:coverage": "backstage-cli package test --coverage --runInBand",
