@@ -11,7 +11,7 @@
     "@backstage/config": "^1.3.8",
     "@backstage/plugin-scaffolder-node": "^0.13.5",
     "@backstage/types": "^1.2.2",
-    "axios": "^1.18.1"
+    "axios": "^1.20.0"
   },
   "description": "A Webex scaffolding module for @backstage/plugin-scaffolder-backend",
   "devDependencies": {
@@ -77,10 +77,15 @@
   },
   "repository": {
     "directory": ".",
-    "type": "git"
+    "type": "git",
+    "url": "git+https://github.com/Coderrob/backstage-plugin-scaffolder-backend-module-webex.git"
   },
   "resolutions": {
-    "adm-zip": "0.6.0"
+    "adm-zip": "0.6.1",
+    "braces": "npm:@zklogic/braces@3.0.7",
+    "selfsigned@npm:^2.4.1": "5.5.0",
+    "undici@npm:7.28.0": "7.29.1",
+    "@rspack/dev-server@npm:^1.1.4": "patch:@rspack/dev-server@npm%3A1.2.1#~/.yarn/patches/@rspack-dev-server-npm-1.2.1-bde3e71c7d.patch"
   },
   "jest": {
     "coverageThreshold": {
@@ -96,6 +101,7 @@
     "audit": "yarn npm audit --recursive --severity high",
     "build": "backstage-cli package build",
     "clean": "backstage-cli package clean",
+    "dependencies:check": "node --test scripts/dependencies/security.test.mjs",
     "lint": "backstage-cli package lint",
     "lint:fix": "yarn prettier . --write",
     "postpack": "backstage-cli package postpack",
@@ -103,6 +109,7 @@
     "prepare": "husky",
     "prettier:check": "prettier --check .",
     "publint": "node scripts/package/publint.mjs",
+    "release:check": "node --test scripts/release/release.test.mjs",
     "start": "backstage-cli package start",
     "test": "backstage-cli package test --no-watch",
     "test:coverage": "backstage-cli package test --coverage --runInBand",
