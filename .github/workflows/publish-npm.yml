@@ -58,6 +58,7 @@ jobs:
       - name: Verify package
         run: |
           yarn release:check
+          yarn dependencies:check
           yarn audit
           yarn lint
           yarn tsc:full

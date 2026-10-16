@@ -5,6 +5,7 @@
 ### Patch Changes
 
 - Added manual release preparation and tag-based or manually dispatched npm trusted publishing workflows.
+- Replaced vulnerable transitive globbing and certificate dependencies in the development checkout, with compatibility tests and an Rspack patch for asynchronous certificate generation.
 
 ## 1.1.0
 

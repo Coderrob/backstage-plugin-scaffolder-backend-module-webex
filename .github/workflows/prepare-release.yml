@@ -69,6 +69,7 @@ jobs:
         run: |
           yarn install --immutable
           yarn release:check
+          yarn dependencies:check
           yarn audit
           yarn lint
           yarn tsc:full

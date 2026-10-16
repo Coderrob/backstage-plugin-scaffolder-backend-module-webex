@@ -15,4 +15,5 @@ app-config.local.yaml
 *.tsbuildinfo
 
 # Yarn
-.yarn
+.yarn/*
+!.yarn/patches/

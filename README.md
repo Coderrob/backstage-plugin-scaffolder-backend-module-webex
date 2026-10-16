@@ -228,6 +228,10 @@ enforces at least 95% coverage for statements, branches, functions, and lines.
 Publint validates the Backstage-transformed npm artifact and its explicit
 publication allowlist.
 
+`yarn dependencies:check` verifies the pinned globbing replacement and Rspack
+HTTPS compatibility patch. See [dependency security overrides](.github/DEPENDENCY_OVERRIDES.md)
+for their rationale, maintenance, and scope for consuming Backstage applications.
+
 ## Releasing
 
 Releases use `.github/workflows/prepare-release.yml` and

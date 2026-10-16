@@ -36,6 +36,9 @@ jobs:
       - name: Check release tooling
         run: yarn release:check
 
+      - name: Check dependency replacements
+        run: yarn dependencies:check
+
       - name: Audit dependencies
         run: yarn audit
 

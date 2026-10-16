@@ -82,7 +82,10 @@
   },
   "resolutions": {
     "adm-zip": "0.6.1",
-    "undici@npm:7.28.0": "7.29.1"
+    "braces": "npm:@zklogic/braces@3.0.7",
+    "selfsigned@npm:^2.4.1": "5.5.0",
+    "undici@npm:7.28.0": "7.29.1",
+    "@rspack/dev-server@npm:^1.1.4": "patch:@rspack/dev-server@npm%3A1.2.1#~/.yarn/patches/@rspack-dev-server-npm-1.2.1-bde3e71c7d.patch"
   },
   "jest": {
     "coverageThreshold": {
@@ -98,6 +101,7 @@
     "audit": "yarn npm audit --recursive --severity high",
     "build": "backstage-cli package build",
     "clean": "backstage-cli package clean",
+    "dependencies:check": "node --test scripts/dependencies/security.test.mjs",
     "lint": "backstage-cli package lint",
     "lint:fix": "yarn prettier . --write",
     "postpack": "backstage-cli package postpack",
